@@ -31,7 +31,6 @@ if os.path.exists(config.DISEASES_FILE):
 
 
 def _label_for(meta: dict) -> tuple:
-    """Pick a display title and source name for a chunk based on its metadata."""
     doc_type = meta.get("type", "reference")
 
     if doc_type == "disease_profile" or meta.get("disease"):
@@ -79,14 +78,11 @@ def _exact_disease_chunks(disease: str):
     )
     documents = result.get("documents", [])
     metadatas = result.get("metadatas", [])
-    # treated as maximally relevant since it's a direct name match, not a
-    # nearest-neighbor guess
+    # Direct disease-name hits are treated as exact matches, not nearest-neighbor guesses.
     return [(doc, meta, 0.0) for doc, meta in zip(documents, metadatas)]
 
 
 def _query_local(query: str, top_k: int):
-    """Additive retrieval: semantic search always runs; an exact disease
-    match (if any) is merged on top of it, never used to filter results out."""
     semantic_hits, best_distance = _semantic_search(query, top_k)
 
     matched_disease = _match_known_disease(query)
@@ -101,8 +97,7 @@ def _query_local(query: str, top_k: int):
             deduped.append((doc, meta, dist))
 
     if config.ENABLE_KEYWORD_RERANK:
-        # cheap re-rank on the already-fetched pool only, not the whole
-        # collection — helps qa/intent chunks that carry no disease metadata
+        # Re-rank only the fetched pool; the full collection is too broad for this.
         deduped.sort(key=lambda item: _keyword_overlap(query, item[0]), reverse=True)
 
     top = deduped[:top_k]

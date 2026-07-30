@@ -3,7 +3,79 @@ import streamlit as st
 
 API_URL = "http://localhost:8000"
 
-st.set_page_config(page_title="HealthAssist", page_icon="🩺", layout="centered")
+st.set_page_config(page_title="HealthAssist", page_icon="H", layout="centered")
+
+st.markdown(
+    """
+    <style>
+        .stApp {
+            background: linear-gradient(180deg, #f7f8fa 0%, #ffffff 30%, #ffffff 100%);
+        }
+
+        .main .block-container {
+            max-width: 920px;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .app-header {
+            padding: 1.25rem 1.5rem;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+            margin-bottom: 1rem;
+        }
+
+        .app-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            line-height: 1.1;
+            color: #0f172a;
+        }
+
+        .app-header p {
+            margin: 0.5rem 0 0;
+            color: #475569;
+            font-size: 0.98rem;
+        }
+
+        .app-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .app-pill {
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: #f8fafc;
+            color: #334155;
+            font-size: 0.82rem;
+        }
+
+        section[data-testid="stSidebar"] {
+            border-right: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        section[data-testid="stSidebar"] .stButton button {
+            width: 100%;
+        }
+
+        .stChatMessage {
+            border-radius: 16px;
+        }
+
+        .stTextInput input,
+        .stChatInput input {
+            border-radius: 12px;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -15,7 +87,7 @@ if "user_context" not in st.session_state:
     st.session_state.user_context = None
 
 with st.sidebar:
-    st.title("🩺 HealthAssist")
+    st.title("HealthAssist")
     st.caption("General healthcare information, not a substitute for medical advice.")
     st.warning(
         "In a medical emergency, call your local emergency number immediately. "
@@ -25,11 +97,28 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.conversation_id = None
         st.session_state.user_context = None
-        st.rerun()
+            st.rerun()
 
-st.title("Healthcare Assistant")
+    st.markdown(
+        """
+        <div class="app-header">
+            <h1>HealthAssist</h1>
+            <p>General health answers with retrieval, guardrails, and optional session context.</p>
+            <div class="app-meta">
+                <span class="app-pill">RAG search</span>
+                <span class="app-pill">Emergency guardrails</span>
+                <span class="app-pill">Mongo fallback</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 if not st.session_state.messages:
+        st.info(
+            "Add optional context once, then ask a question. The assistant will keep it in"
+            " mind for the rest of the conversation."
+        )
     st.session_state.user_context = st.text_input(
         "Any conditions you'd like me to consider? (optional)",
         value=st.session_state.user_context or "",
@@ -43,7 +132,7 @@ for msg in st.session_state.messages:
                 for src in msg["sources"]:
                     st.markdown(f"- **{src['title']}** ({src['origin']})")
 
-user_input = st.chat_input("Ask a general health question...")
+user_input = st.chat_input("Ask a general health question")
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})

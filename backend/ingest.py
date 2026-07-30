@@ -41,7 +41,6 @@ def main():
         print("No records found in dataset.")
         return
 
-    # clear any existing entries before re-indexing, avoids duplicates on reruns
     existing = collection.get()
     if existing["ids"]:
         collection.delete(ids=existing["ids"])
